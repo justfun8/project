@@ -6,6 +6,5 @@ using a skip list to sort customers
 *  ps: I've sorted scores from low to high in the picture, which is a mistake.  However, the scores in my code are sorted correctly from high to low. The insertion process was the same for both.
 
 as part of the skip list's update process.
-![Alt text](Pictures/node.png)
-![Alt text](Pictures/addnode.png)
+![Alt text](Pictures/node2.png)
 The webapi can work now. There are many areas that need improvement, such as thread safety(using ReaderWriterLockSlim ) , some warnings and handling exceptions. I'm working on it.
