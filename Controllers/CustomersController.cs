@@ -20,11 +20,11 @@ namespace customers.Controllers
         }
 
         [HttpPost("customer/{customerId}/score/{score}")]
-        public ActionResult<int> AddOrUpdateScore(long customerId, int score)
+        public ActionResult<int> AddOrUpdate(long customerId, int score)
         {
             try
             {
-                var currentScore = _customersService.AddOrUpdateCustomerScore(customerId, score);
+                var currentScore = _customersService.AddOrUpdate(customerId, score);
                 return Ok(currentScore); 
             }
             catch (ArgumentOutOfRangeException ex)
@@ -72,10 +72,6 @@ namespace customers.Controllers
                 );
                 return Ok(customerDtos);
             }
-            // catch (CustomerNotFoundException ex)
-            // {
-            //     return NotFound(ex.Message);
-            // }
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);

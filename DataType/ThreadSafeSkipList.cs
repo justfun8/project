@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using customers.Models;
 
 namespace customers.DataType
 {
@@ -27,12 +28,12 @@ namespace customers.DataType
         }
 
 
-        public List<(long ID, int Score, int rank)> GetCustomersByRange(int start, int end)
+        public List<CustomerDto> GetCustomersByRange(int? start, int? end)
         {
             _rwLock.EnterReadLock();
             try
             {
-                List<(long ID, int Score, int Rank)> rangeCustomers = skipList.GetCustomersByRange(
+                List<CustomerDto> rangeCustomers = skipList.GetCustomersByRange(
                     start,
                     end
                 );
@@ -44,7 +45,7 @@ namespace customers.DataType
             }
         }
 
-        public (long ID, int Score, int Rank)[] GetCustomersAroundCustomer(
+        public List<CustomerDto> GetCustomersAroundCustomerId(
             long id,
             int high,
             int low
@@ -53,7 +54,7 @@ namespace customers.DataType
             _rwLock.EnterReadLock();
             try
             {
-                (long ID, int Score, int Rank)[] Customers = skipList.GetCustomersAroundCustomer(
+                List<CustomerDto> Customers = skipList.GetCustomersAroundCustomerId(
                     id,
                     high,
                     low

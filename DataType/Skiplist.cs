@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using customers.Models;
 
 namespace customers.DataType
 {
@@ -221,16 +222,19 @@ namespace customers.DataType
         /// <summary>
         ///  method 2: obtain customers within a specified ranking range
         /// </summary>
-        public List<(long ID, int Score, int rank)> GetCustomersByRange(int start, int end)
+        // public List<(long ID, int Score, int rank)> GetCustomersByRange(int? start, int? end)
+        public List<CustomerDto> GetCustomersByRange(int? start, int? end)
         {
             if (start > IDScoreDictionary.Count)
             {
-                throw new ArgumentOutOfRangeException(
-                    nameof(start),
-                    $"{start} Rank is out of bounds of the skip list."
-                );
+                // throw new ArgumentOutOfRangeException(
+                //     nameof(start),
+                //     $"{start} Rank is out of bounds of the skip list."
+                // );
+                return new List<CustomerDto>();
             }
-            var result = new List<(long, int, int)>();
+            // var result = new List<(long, int, int)>();
+            var result = new List<CustomerDto>();
             int currentRank = 0;
             SkipListNode node = head;
             // Find the first node not ranked lower than start
@@ -243,14 +247,26 @@ namespace customers.DataType
                 }
             }
             // Move to the actual starting node
-            currentRank++;
             node = node.Forward[0];
-
+            currentRank++;
+            // while (node != null && currentRank <= end)
+            // {
+            //     result.Add((node.ID, node.Score, currentRank));
+            //     currentRank++;
+            //     node = node.Forward[0];
+            // }
             while (node != null && currentRank <= end)
             {
-                result.Add((node.ID, node.Score, currentRank));
-                currentRank++;
+                result.Add(
+                    new CustomerDto
+                    {
+                        CustomerId = node.ID,
+                        Score = node.Score,
+                        Rank = currentRank
+                    }
+                );
                 node = node.Forward[0];
+                currentRank++;
             }
 
             return result;
@@ -293,11 +309,7 @@ namespace customers.DataType
             return (node, rank);
         }
 
-        public (long ID, int Score, int Rank)[] GetCustomersAroundCustomer(
-            long id,
-            int high = 0,
-            int low = 0
-        )
+        public List<CustomerDto> GetCustomersAroundCustomerId(long id, int high = 0, int low = 0)
         {
             if (!IDScoreDictionary.ContainsKey(id))
                 throw new KeyNotFoundException($"Customer with ID {id} not found.");
@@ -305,36 +317,88 @@ namespace customers.DataType
             int score = IDScoreDictionary[id];
 
             var (node, rank) = FindNodeByScoreAndId(score, id);
+            var result = new List<CustomerDto>();
+            result.Add(
+                new CustomerDto
+                {
+                    CustomerId = node.ID,
+                    Score = node.Score,
+                    Rank = rank
+                }
+            );
             // If the high value is too large, or the low value too small, adjust the array length
-            if (high >= rank)
-                high = rank - 1;
-            if (low + rank > IDScoreDictionary.Count)
-                low = IDScoreDictionary.Count - rank;
-            var result = new (long ID, int Score, int Rank)[high + low + 1];
+            // if (high >= rank)
+            //     high = rank - 1;
+            // if (low + rank > IDScoreDictionary.Count)
+            //     low = IDScoreDictionary.Count - rank;
+            // var result = new (long ID, int Score, int Rank)[high + low + 1];
 
             // Insert the original node
-            result[high] = (node.ID, node.Score, rank);
+
+            // Insert the original node's data
 
             SkipListNode currentNode = node;
-            int irank = rank - 1;
-            for (int i = high - 1; i >= 0 && currentNode.Backward != null; i--, irank--)
+            int currentRank = rank - 1;
+
+            // Gather nodes with higher rank
+            // for (int i = high - 1; i >= 0 && currentNode.Backward != null; i--, currentRank--)
+            for (int i = 0; i < high && node.Backward != null; i++, currentRank--)
             {
                 currentNode = currentNode.Backward;
-                result[i] = (currentNode.ID, currentNode.Score, irank);
+                result.Add(
+                    new CustomerDto
+                    {
+                        CustomerId = currentNode.ID,
+                        Score = currentNode.Score,
+                        Rank = currentRank
+                    }
+                );
             }
+            result.Reverse();
 
             currentNode = node;
-            irank = rank + 1;
+            currentRank = rank + 1;
 
-            for (
-                int i = high + 1;
-                i < high + low + 1 && currentNode.Forward[0] != null;
-                i++, irank++
-            )
+            // Gather nodes with lower rank
+            // for (
+            //     int i = high + 1;
+            //     i < high + low + 1 && currentNode.Forward[0] != null;
+            //     i++, currentRank++
+            // )
+            for (int i = 1; i <= low && node.Forward[0] != null; i++, currentRank++)
             {
                 currentNode = currentNode.Forward[0];
-                result[i] = (currentNode.ID, currentNode.Score, irank);
+                result.Add(
+                    new CustomerDto
+                    {
+                        CustomerId = currentNode.ID,
+                        Score = currentNode.Score,
+                        Rank = currentRank
+                    }
+                );
             }
+            // result[high] = (node.ID, node.Score, rank);
+
+            // SkipListNode currentNode = node;
+            // int irank = rank - 1;
+            // for (int i = high - 1; i >= 0 && currentNode.Backward != null; i--, irank--)
+            // {
+            //     currentNode = currentNode.Backward;
+            //     result[i] = (currentNode.ID, currentNode.Score, irank);
+            // }
+
+            // currentNode = node;
+            // irank = rank + 1;
+
+            // for (
+            //     int i = high + 1;
+            //     i < high + low + 1 && currentNode.Forward[0] != null;
+            //     i++, irank++
+            // )
+            // {
+            //     currentNode = currentNode.Forward[0];
+            //     result[i] = (currentNode.ID, currentNode.Score, irank);
+            // }
 
             return result;
         }

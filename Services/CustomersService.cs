@@ -16,7 +16,7 @@ public class CustomersService : ICustomersService
         _skipList = skipList;
     }
 
-    public int AddOrUpdateCustomerScore(long customerId, int score)
+    public int AddOrUpdate(long customerId, int score)
     {
         if (score < -1000 || score > 1000)
         {
@@ -46,45 +46,49 @@ public class CustomersService : ICustomersService
 
         if (start.Value > end.Value)
         {
-            throw new ArgumentOutOfRangeException(
-                nameof(end),
-                start.Value,
-                $"The 'end' index cannot be less than {start.Value}."
-            );
+            // throw new ArgumentOutOfRangeException(
+            //     nameof(end),
+            //     start.Value,
+            //     $"The 'end' index cannot be less than {start.Value}."
+            // );
+            return new List<CustomerDto>();
         }
         if (start.Value <= 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(start), "start must be positive.");
+            // throw new ArgumentOutOfRangeException(nameof(start), "start must be positive.");
+            return new List<CustomerDto>();
         }
-        var customersTupleList = _skipList.GetCustomersByRange(start.Value, end.Value);
-        var customerDtos = customersTupleList
-            .Select(c => new CustomerDto
-            {
-                ID = c.ID,
-                Score = c.Score,
-                Rank = c.rank
-            })
-            .ToList();
+        var customerDtos = _skipList.GetCustomersByRange(start.Value, end.Value);
+        // var customerDtos = customersTupleList
+        // .Select(c => new CustomerDto
+        // {
+        //     CustomerId = c.ID,
+        //     Score = c.Score,
+        //     Rank = c.rank
+        // })
+        // .ToList();
 
         return customerDtos;
     }
 
-    public List<CustomerDto> GetCustomersAroundCustomerId(int customerId, int high, int low)
+    public List<CustomerDto> GetCustomersAroundCustomerId(long customerId, int high, int low)
     {
-        if (high < 0 || low < 0)
-        {
-            throw new ArgumentOutOfRangeException("high and low must be positive.");
-        }
+        // if (high < 0 || low < 0)
+        // {
+        //     throw new ArgumentOutOfRangeException("high and low must be positive.");
+        // }
+        if(high<0)high=0;
+        if(low<0)low=0;
 
-        var resultsTuple = _skipList.GetCustomersAroundCustomer(customerId, high, low);
-        var customerDtos = resultsTuple
-            .Select(tuple => new CustomerDto
-            {
-                ID = tuple.ID,
-                Score = tuple.Score,
-                Rank = tuple.Rank
-            })
-            .ToList();
+        var customerDtos = _skipList.GetCustomersAroundCustomerId(customerId, high, low);
+        // var customerDtos = resultsTuple
+        //     .Select(tuple => new CustomerDto
+        //     {
+        //         CustomerId = tuple.ID,
+        //         Score = tuple.Score,
+        //         Rank = tuple.Rank
+        //     })
+        //     .ToList();
         return customerDtos;
     }
 }
